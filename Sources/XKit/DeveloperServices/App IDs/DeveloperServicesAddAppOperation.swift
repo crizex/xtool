@@ -43,7 +43,7 @@ public struct DeveloperServicesAddAppOperation: DeveloperServicesOperation {
         entitlements: Entitlements,
         isFreeTeam: Bool
     ) async throws -> Components.Schemas.BundleId {
-        let newBundleID = ProvisioningIdentifiers.identifier(fromSanitized: bundleID, context: self.context)
+        let newBundleID = ProvisioningIdentifiers.identifier(fromSanitized: bundleID, context: self.context, isFreeTeam: isFreeTeam)
 
         let existing = try await context.developerAPIClient
             .bundleIdsGetCollection(query: .init(
@@ -211,7 +211,8 @@ public struct DeveloperServicesAddAppOperation: DeveloperServicesOperation {
             if let operation = DeveloperServicesAssignAppGroupsOperation(
                 context: self.context,
                 groupIDs: groups,
-                appID: appID
+                appID: appID,
+                isFreeTeam: isFreeTeam
             ) {
                 let newGroups = try await operation.perform()
                 entitlementsArray[groupsIdx] = AppGroupEntitlement(rawValue: newGroups)
