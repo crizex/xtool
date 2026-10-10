@@ -49,16 +49,14 @@ public struct DeveloperServicesFetchProfileOperation: DeveloperServicesOperation
             throw Errors.tooManyMatchingBundleIDs
         }
 
-        let profiles = bundleID.relationships?.profiles?.data ?? []
-        switch profiles.count {
-        case 0:
-            // we're good
-            break
-        case 1:
-            _ = try await context.developerAPIClient.profilesDeleteInstance(path: .init(id: profiles[0].id)).noContent
-        default:
-            // if the user has >1 profile, it's probably okay to add another one (acceptable for non-free accounts?)
-            break
+        let profileName = "XTL profile \(bundleID.id)"
+        // Replace only profiles xtool created earlier (same name); creating a second profile with
+        // the same name fails with 409. Profiles managed elsewhere (Xcode, CI) are left alone.
+        let ownProfiles = try await context.developerAPIClient.profilesGetCollection(
+            query: .init(filter_lbrack_name_rbrack_: [profileName])
+        ).ok.body.json.data
+        for profile in ownProfiles {
+            _ = try await context.developerAPIClient.profilesDeleteInstance(path: .init(id: profile.id)).noContent
         }
 
         let serialNumber = signingInfo.certificate.serialNumber()
@@ -79,7 +77,7 @@ public struct DeveloperServicesFetchProfileOperation: DeveloperServicesOperation
                     data: .init(
                         _type: .profiles,
                         attributes: .init(
-                            name: "XTL profile \(bundleID.id)",
+                            name: profileName,
                             profileType: .init(.iosAppDevelopment)
                         ),
                         relationships: .init(
