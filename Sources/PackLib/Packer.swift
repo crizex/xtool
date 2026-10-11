@@ -238,6 +238,9 @@ extension Plan.Product {
         case .application: """
         [
             .unsafeFlags([
+                // Dependencies arrive as static archives; members whose only content is looked up at runtime
+                // (protocol conformances such as Bool: AtomicValue) would be dropped, so load all like Xcode does
+                "-Xlinker", "-all_load",
                 "-Xlinker", "-rpath", "-Xlinker", "@executable_path/Frameworks",
             ]),
         ]
