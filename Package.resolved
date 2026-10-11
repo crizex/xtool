@@ -454,10 +454,10 @@
     {
       "identity" : "zsign",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/xtool-org/zsign",
+      "location" : "https://github.com/crizex/zsign",
       "state" : {
-        "revision" : "f6158be9e62a5ce2a53d72b1a6d880880da956c8",
-        "version" : "1.9.0"
+        "branch" : "per-bundle-entitlements",
+        "revision" : "992940b348362ea9784894481b636724d2f33386"
       }
     }
   ],

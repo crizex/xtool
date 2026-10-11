@@ -249,6 +249,9 @@ extension Plan.Product {
             .unsafeFlags([
                 // Set the entry point to Foundation`_NSExtensionMain
                 "-Xlinker", "-e", "-Xlinker", "_NSExtensionMain",
+                // The extension's code arrives as a static archive and nothing references it from the stub
+                // (the principal class is only named in Info.plist), so force-load it like Xcode links all objects
+                "-Xlinker", "-all_load",
                 // Include frameworks that the host app may use
                 "-Xlinker", "-rpath", "-Xlinker", "@executable_path/../../Frameworks",
                 // ...as well as our own

@@ -50,7 +50,7 @@ let package = Package(
     dependencies: [
         .package(url: "https://github.com/xtool-org/xtool-core", .upToNextMinor(from: "1.5.0")),
         .package(url: "https://github.com/xtool-org/SwiftyMobileDevice", .upToNextMinor(from: "1.7.0")),
-        .package(url: "https://github.com/xtool-org/zsign", .upToNextMinor(from: "1.9.0")),
+        .package(url: "https://github.com/crizex/zsign", branch: "per-bundle-entitlements"),
         .package(url: "https://github.com/xtool-org/xadi", .upToNextMinor(from: "0.4.2")),
 
         .package(url: "https://github.com/apple/swift-system", from: "1.4.0"),
