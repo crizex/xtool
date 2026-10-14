@@ -160,46 +160,7 @@ struct DevBuildCommand: AsyncParsableCommand {
             buildOptions: packOptions
         ).run()
 
-        if let signingAuthToken {
-            let installDelegate = XToolInstallerDelegate()
-            let installer = IntegratedInstaller(
-                auth: signingAuthToken.authData(),
-                delegate: installDelegate
-            )
-            do {
-                defer { print() }
-                try await installer.signInPlace(app: url)
-            } catch let error as CancellationError {
-                throw error
-            } catch {
-                print("Error: \(error)")
-                throw ExitCode.failure
-            }
-        }
-
-        let finalURL: URL
-        if ipa {
-            @Dependency(\.zipCompressor) var compressor
-            finalURL = url.deletingPathExtension().appendingPathExtension("ipa")
-            let tmpDir = try TemporaryDirectory(name: "Payload")
-            let payloadDir = tmpDir.url
-            try FileManager.default.moveItem(at: url, to: payloadDir.appendingPathComponent(url.lastPathComponent))
-            let ipaURL = try await compressor.compress(directory: payloadDir) { progress in
-                if let progress {
-                    let percent = Int(progress * 100)
-                    print("\rPackaging... \(percent)%", terminator: "")
-                } else {
-                    print("\rPackaging...", terminator: "")
-                }
-            }
-            print()
-            try? FileManager.default.removeItem(at: finalURL)
-            try FileManager.default.moveItem(at: ipaURL, to: finalURL)
-        } else {
-            finalURL = url
-        }
-
-        print("Wrote to \(finalURL.path)")
+        try await SignCommand.finish(app: url, signingAuthToken: signingAuthToken, ipa: ipa)
     }
 }
 
