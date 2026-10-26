@@ -375,6 +375,26 @@ struct SDKBuilder {
                 -o "$output"
         fi
 
+        # The Linux link passes the deployment target as SDK version (-platform_version ios 16.0 16.0), so LC_BUILD_VERSION
+        # says the app was built with an old SDK and iOS runs it in compatibility mode (e.g. letterboxed on iPhone Duo).
+        # Substitute the real SDK version from SDKSettings.json.
+        if find_argument_value -syslibroot "$@" && [ -f "$argument_value/SDKSettings.json" ]; then
+            sdk_version="$(grep -o '"Version" *: *"[0-9.]*"' "$argument_value/SDKSettings.json" | head -n 1 | cut -d '"' -f 4)"
+            if [ -n "$sdk_version" ]; then
+                state=
+                for argument do
+                    shift
+                    case "$state" in
+                        platform) state=min ;;
+                        min) state=sdk ;;
+                        sdk) argument="$sdk_version"; state= ;;
+                    esac
+                    [ "$argument" = "-platform_version" ] && state=platform
+                    set -- "$@" "$argument"
+                done
+            fi
+        fi
+
         exec "$bin_dir/orig/ld64.lld" "$@"
         """.write(
             to: ld64,
